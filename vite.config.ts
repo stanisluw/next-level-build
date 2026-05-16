@@ -51,6 +51,7 @@ export default (args: ViteConfigInput) => {
 				'#widgets': path.resolve(__dirname, './src/widgets'),
 				'#features': path.resolve(__dirname, './src/features'),
 				'#entities': path.resolve(__dirname, './src/entities'),
+				'#preferences': path.resolve(__dirname, './src/preferences'),
 				'#shared': path.resolve(__dirname, './src/shared'),
 			},
 		},
