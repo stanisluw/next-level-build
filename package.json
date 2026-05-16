@@ -1,7 +1,7 @@
 {
 	"name": "next-level-build",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"type": "module",
 	"imports": {
 		"#app/*": "./src/app/*",
@@ -9,6 +9,8 @@
 		"#widgets/*": "./src/widgets/*",
 		"#features/*": "./src/features/*",
 		"#entities/*": "./src/entities/*",
+		"#preferences/*": "./src/preferences/*",
+		"#preferences": "./src/preferences",
 		"#shared/*": "./src/shared/*"
 	},
 	"scripts": {

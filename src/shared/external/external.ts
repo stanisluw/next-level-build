@@ -27,3 +27,8 @@ export const LOCALE = await getExternalJSON(VITE_LOCALE_URL, localeSchema);
 export const API = {
 	URL: urlcat(APP_INFO.apiUrl, 'api'),
 };
+
+const PUBLIC_IMG_PATH = '/img';
+const LOGO_PATH = `${PUBLIC_IMG_PATH}/logo`;
+export const LOGO_LIGHT_PATH = `${LOGO_PATH}/light.svg`;
+export const LOGO_DARK_PATH = `${LOGO_PATH}/dark.svg`;

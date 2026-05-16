@@ -1,5 +1,9 @@
 {
 	"app": {
 		"name": "NextLevelBuild"
-	}
+	},
+	"404": "404",
+	"pageNotFound": "Страница не найдена",
+	"projects": "Проекты",
+	"employees": "Сотрудники"
 }
