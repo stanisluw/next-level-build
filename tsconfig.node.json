@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+		"target": "es2023",
+		"lib": ["ES2023"],
+		"module": "esnext",
+		"types": ["node"],
+		"skipLibCheck": true,
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"erasableSyntaxOnly": false,
+		"noFallthroughCasesInSwitch": true,
+		"paths": {
+			"#app/*": ["./src/app/*"],
+			"#pages/*": ["./src/pages/*"],
+			"#widgets/*": ["./src/widgets/*"],
+			"#features/*": ["./src/features/*"],
+			"#entities/*": ["./src/entities/*"],
+			"#shared/*": ["./src/shared/*"],
+			"urlcat": ["./node_modules/urlcat/dist/index.d.ts"]
+		}
+	},
+	"include": ["vite.config.ts", "tailwind.config.ts"]
+}
