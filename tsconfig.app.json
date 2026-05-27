@@ -22,6 +22,7 @@
 			"#widgets/*": ["./src/widgets/*"],
 			"#features/*": ["./src/features/*"],
 			"#entities/*": ["./src/entities/*"],
+			"#auth/*": ["./src/auth/*"],
 			"#preferences/*": ["./src/preferences/*"],
 			"#preferences": ["./src/preferences"],
 			"#shared/*": ["./src/shared/*"],

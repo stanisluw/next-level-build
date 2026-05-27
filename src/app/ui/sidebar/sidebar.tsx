@@ -1,11 +1,11 @@
-import type { FC } from 'react';
-
 import { Button } from 'antd';
 import cn from 'classnames';
+import type { FC } from 'react';
 
 import { ChevronLeftIcon } from 'lucide-react';
 import { ROUTE_NAMES } from '#shared/config';
 import { LOCALE, LOGO_DARK_PATH } from '#shared/external';
+import { AuthUser } from '../../../auth/ui/auth-user';
 import { SidebarMenuItem } from './sidebar-menu-item';
 import { useSidebar } from './use-sidebar';
 
@@ -41,9 +41,14 @@ export const Sidebar: FC = () => {
 						/>
 					</div>
 				</div>
+
+				<div className='mt-auto'>
+					<AuthUser isCollapsed={isSidebarCollapsed} />
+				</div>
+
 				<div className={CL.CONTENT}>
 					<Button
-						size={'large'}
+						size={'medium'}
 						variant={'solid'}
 						color={'primary'}
 						icon={
