@@ -5,6 +5,8 @@ import { createBrowserRouter } from 'react-router';
 import { AppLayout, AuthLayout, Layout } from '#app/ui';
 import { ROUTE_NAMES } from '#shared/config';
 
+import ResourcePage from '#pages/resource';
+
 const HomePage = lazy(() => import('#pages/home'));
 const ProjectsPage = lazy(() => import('#pages/projects'));
 const ProjectPage = lazy(() => import('#pages/project'));
@@ -27,6 +29,7 @@ export const router = createBrowserRouter([
 					{ path: ROUTE_NAMES.PROJECT, element: <ProjectPage /> },
 					{ path: ROUTE_NAMES.EMPLOYEES, element: <EmployeesPage /> },
 					{ path: ROUTE_NAMES.EMPLOYEE, element: <EmployeePage /> },
+					{ path: ROUTE_NAMES.RESOURCE, element: <ResourcePage /> },
 				],
 			},
 			{
