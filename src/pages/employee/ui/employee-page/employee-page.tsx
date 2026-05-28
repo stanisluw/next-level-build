@@ -1,3 +1,5 @@
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Col, Row, Space, Tag } from 'antd';
 import {
 	ArcElement,
 	BarElement,
@@ -123,18 +125,24 @@ const employeesData: Record<number, any> = {
 	},
 };
 
-function EmployeePage() {
+export default function EmployeePage() {
 	const { employeeId } = useParams();
 	const navigate = useNavigate();
 	const employee = employeesData[Number(employeeId)];
 
 	if (!employee) {
 		return (
-			<div className='p-4'>
-				<button onClick={() => navigate('/employees')} className='text-primary'>
-					← Назад
-				</button>
-				<h1 className='text-xl font-bold'>Сотрудник не найден</h1>
+			<div style={{ padding: 24 }}>
+				<Button
+					type='link'
+					onClick={() => navigate('/employees')}
+					style={{ paddingLeft: 0 }}
+				>
+					<ArrowLeftOutlined /> Назад
+				</Button>
+				<Card>
+					<h1>Сотрудник не найден</h1>
+				</Card>
 			</div>
 		);
 	}
@@ -145,8 +153,8 @@ function EmployeePage() {
 			{
 				label: 'План',
 				data: employee.monthlyData.plan,
-				borderColor: '#3b82f6',
-				backgroundColor: 'rgba(59, 130, 246, 0.1)',
+				borderColor: '#4F8BFF',
+				backgroundColor: 'rgba(79, 139, 255, 0.1)',
 				tension: 0.4,
 			},
 			{
@@ -162,7 +170,7 @@ function EmployeePage() {
 	const barChartData = {
 		labels: employee.monthlyData.labels,
 		datasets: [
-			{ label: 'План', data: employee.monthlyData.plan, backgroundColor: '#3b82f6' },
+			{ label: 'План', data: employee.monthlyData.plan, backgroundColor: '#4F8BFF' },
 			{ label: 'Факт', data: employee.monthlyData.actual, backgroundColor: '#10b981' },
 		],
 	};
@@ -185,58 +193,70 @@ function EmployeePage() {
 	};
 
 	return (
-		<div className='p-6 bg-gray-50 min-h-screen'>
-			<div className='mb-4 text-sm text-gray-500'>
-				<span
-					className='hover:text-primary cursor-pointer'
-					onClick={() => navigate('/employees')}
-				>
-					Назад
-				</span>
-			</div>
+		<div style={{ padding: 24, background: '#f9fafb', minHeight: '100vh' }}>
+			<Button
+				type='link'
+				onClick={() => navigate('/employees')}
+				style={{ paddingLeft: 0, marginBottom: 16 }}
+			>
+				Назад
+			</Button>
 
-			<div className='bg-white rounded-lg shadow-sm border p-3 mb-4'>
-				<div className='flex items-center gap-3'>
-					<div className='w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white text-lg font-bold'>
+			<Card style={{ marginBottom: 24 }}>
+				<div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+					<Avatar
+						size={48}
+						style={{
+							backgroundColor: '#4F8BFF',
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							fontSize: 20,
+						}}
+					>
 						{employee.name.charAt(0)}
-					</div>
+					</Avatar>
 					<div>
-						<h1 className='text-lg font-bold'>{employee.name}</h1>
-						<p className='text-xs text-gray-500'>{employee.position}</p>
-						<div className='flex gap-3 mt-1 text-xs'>
-							<span>{employee.experience}</span>
-							<span className='text-primary'>План: {employee.planHours}ч</span>
-							<span className='text-green-600'>Факт: {employee.actualHours}ч</span>
-							<span className='text-emerald-600'>✅ {employee.completionRate}%</span>
+						<h1 style={{ fontSize: 18, fontWeight: 'bold', margin: 0 }}>
+							{employee.name}
+						</h1>
+						<p style={{ color: '#6b7280', margin: '4px 0', fontSize: 12 }}>
+							{employee.position}
+						</p>
+						<Space size={12} wrap>
+							<Tag>{employee.experience}</Tag>
+							<Tag color='blue'>План: {employee.planHours}ч</Tag>
+							<Tag color='green'>Факт: {employee.actualHours}ч</Tag>
+						</Space>
+					</div>
+				</div>
+			</Card>
+
+			<Row gutter={[16, 16]}>
+				<Col xs={24} lg={12}>
+					<Card title='Динамика нагрузки' size='small' style={{ height: '100%' }}>
+						<div style={{ height: 220 }}>
+							<Line data={lineChartData} options={options} />
 						</div>
-					</div>
-				</div>
-			</div>
+					</Card>
+				</Col>
 
-			<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-				<div className='bg-white rounded-lg shadow-sm border p-2'>
-					<h3 className='text-sm font-semibold mb-2'>Динамика нагрузки</h3>
-					<div style={{ height: 180 }}>
-						<Line data={lineChartData} options={options} />
-					</div>
-				</div>
+				<Col xs={24} lg={12}>
+					<Card title='Выполнение задач' size='small' style={{ height: '100%' }}>
+						<div style={{ height: 220 }}>
+							<Pie data={pieChartData} options={options} />
+						</div>
+					</Card>
+				</Col>
 
-				<div className='bg-white rounded-lg shadow-sm border p-2'>
-					<h3 className='text-sm font-semibold mb-2'>Выполнение задач</h3>
-					<div style={{ height: 180 }}>
-						<Pie data={pieChartData} options={options} />
-					</div>
-				</div>
-
-				<div className='md:col-span-2 bg-white rounded-lg shadow-sm border p-2'>
-					<h3 className='text-sm font-semibold mb-2'>Сравнение план/факт</h3>
-					<div style={{ height: 200 }}>
-						<Bar data={barChartData} options={options} />
-					</div>
-				</div>
-			</div>
+				<Col xs={24}>
+					<Card title='Сравнение план/факт' size='small'>
+						<div style={{ height: 260 }}>
+							<Bar data={barChartData} options={options} />
+						</div>
+					</Card>
+				</Col>
+			</Row>
 		</div>
 	);
 }
-
-export default EmployeePage;

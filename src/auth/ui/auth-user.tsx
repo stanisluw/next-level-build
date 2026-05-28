@@ -1,6 +1,9 @@
-import { LogOut } from 'lucide-react';
+import { CloseCircleOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Space, Typography } from 'antd';
 import type React from 'react';
 import { useAuthUser } from './use-auth-user';
+
+const { Text, Title } = Typography;
 
 interface AuthUserProps {
 	isCollapsed?: boolean;
@@ -9,33 +12,34 @@ interface AuthUserProps {
 export const AuthUser: React.FC<AuthUserProps> = ({ isCollapsed = false }) => {
 	const { user, handleLogout } = useAuthUser();
 
+	const handleAddUser = () => {
+		localStorage.setItem(
+			'auth',
+			JSON.stringify({
+				email: 'kudrmatvey@gmail.com',
+				name: 'Кудрявцев Матвей',
+			})
+		);
+		window.location.reload();
+	};
+
 	if (!user?.email) {
 		return (
-			<div
+			<Card
 				style={{
-					padding: '11px',
-					margin: '31px',
-					background: '333333',
-					borderRadius: '8px',
+					background: '#333333',
+					borderRadius: 8,
+					margin: 16,
 				}}
+				bodyStyle={{ padding: 11 }}
 			>
-				<p style={{ fontSize: '12px', color: 'FFFFFF' }}>Нет данных пользователя</p>
-				<button
-					onClick={() => {
-						localStorage.setItem(
-							'auth',
-							JSON.stringify({
-								email: 'kudrmatvey@gmail.com',
-								name: 'Кудрявцев Матвей',
-							})
-						);
-						window.location.reload();
-					}}
-					style={{ fontSize: '12px', padding: '5px 10px', cursor: 'pointer' }}
-				>
-					Добавить пользователя
-				</button>
-			</div>
+				<Space direction='vertical' size={8} style={{ width: '100%', textAlign: 'center' }}>
+					<Text style={{ color: '#ffffff', fontSize: 12 }}>Нет данных пользователя</Text>
+					<Button type='primary' size='small' onClick={handleAddUser}>
+						Добавить пользователя
+					</Button>
+				</Space>
+			</Card>
 		);
 	}
 
@@ -44,39 +48,58 @@ export const AuthUser: React.FC<AuthUserProps> = ({ isCollapsed = false }) => {
 
 	if (isCollapsed) {
 		return (
-			<div className='flex justify-center p-0'>
-				<img
-					src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3b82f6&color=fff&rounded=true`}
-					alt={user.name}
-					className='w-12 h-28 rounded-full cursor-pointer'
+			<div style={{ display: 'flex', justifyContent: 'center', padding: '0 0 38px 0' }}>
+				<Avatar
+					size={48}
+					src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4F8BFF&color=fff&rounded=true`}
+					style={{ cursor: 'pointer', width: 55, height: 55 }}
 					onClick={handleLogout}
-					title='Выйти'
+					alt={user.name}
 				/>
 			</div>
 		);
 	}
 
 	return (
-		<div className='flex items-center justify-between gap-4 p-4 333333 rounded-lg border border-gray-200 w-full mb-4'>
-			<div className='flex items-center gap-2'>
-				<img
-					src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=3b82f6&color=fff&rounded=true`}
-					alt={user.name}
-					className='w-12 h-12 rounded-full'
-				/>
-				<div>
-					<div className='font-medium text-white'>
-						{firstName} {lastName}
-					</div>
-					<div className='text-xs text-gray-500'>{user.email}</div>
-				</div>
-			</div>
-			<button
-				onClick={handleLogout}
-				className='p-2 text-gray-400 hover:text-white hover:white rounded-lg transition-colors'
+		<Card
+			style={{
+				background: '#333333',
+				borderRadius: 8,
+				border: '1px solid #e5e7eb',
+				marginBottom: 16,
+			}}
+			bodyStyle={{ padding: 16 }}
+		>
+			<div
+				style={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between',
+					gap: 16,
+				}}
 			>
-				<LogOut size={22} />
-			</button>
-		</div>
+				<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+					<Avatar
+						size={55}
+						src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4F8BFF&color=fff&rounded=true`}
+						alt={user.name}
+					/>
+					<div>
+						<Title level={5} style={{ margin: 0, color: '#ffffff' }}>
+							{firstName} {lastName}
+						</Title>
+						<Text type='secondary' style={{ fontSize: 12, color: '#9ca3af' }}>
+							{user.email}
+						</Text>
+					</div>
+				</div>
+				<Button
+					type='text'
+					icon={<CloseCircleOutlined style={{ fontSize: 20 }} />}
+					onClick={handleLogout}
+					style={{ color: '#9ca3af' }}
+				/>
+			</div>
+		</Card>
 	);
 };

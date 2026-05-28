@@ -1,16 +1,7 @@
-import {
-	type ColumnDef,
-	type SortingState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	useReactTable,
-} from '@tanstack/react-table';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
-import type React from 'react';
-import { useMemo, useState } from 'react';
+import { SearchOutlined } from '@ant-design/icons';
+import { Card, Input, Space, Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 interface Employee {
@@ -53,165 +44,93 @@ const sampleEmployees: Employee[] = [
 	},
 ];
 
-const EmployeesTable: React.FC = () => {
+export default function EmployeesPage() {
 	const navigate = useNavigate();
-	const [data] = useState<Employee[]>(sampleEmployees);
-	const [sorting, setSorting] = useState<SortingState>([]);
-	const [globalFilter, setGlobalFilter] = useState('');
+	const [search, setSearch] = useState('');
 
-	const columns = useMemo<ColumnDef<Employee>[]>(
-		() => [
-			{
-				accessorKey: 'name',
-				header: 'ФИО',
-				size: 350,
-			},
-			{
-				accessorKey: 'position',
-				header: 'Должность',
-				size: 300,
-			},
-			{
-				accessorKey: 'experience',
-				header: 'Стаж',
-				size: 120,
-			},
-		],
-		[]
+	const filteredEmployees = sampleEmployees.filter((employee) =>
+		employee.name.toLowerCase().includes(search.toLowerCase())
 	);
-
-	const table = useReactTable({
-		data,
-		columns,
-		state: { sorting, globalFilter },
-		onSortingChange: setSorting,
-		onGlobalFilterChange: setGlobalFilter,
-		getCoreRowModel: getCoreRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		initialState: { pagination: { pageSize: 10 } },
-	});
 
 	const handleRowClick = (employeeId: number) => {
 		console.log('Переход к сотруднику:', employeeId);
 		navigate(`/employees/${employeeId}`);
 	};
 
+	const columns: ColumnsType<Employee> = [
+		{
+			title: 'ФИО',
+			dataIndex: 'name',
+			key: 'name',
+			sorter: (a, b) => a.name.localeCompare(b.name),
+		},
+		{
+			title: 'Должность',
+			dataIndex: 'position',
+			key: 'position',
+			sorter: (a, b) => a.position.localeCompare(b.position),
+		},
+		{
+			title: 'Стаж',
+			dataIndex: 'experience',
+			key: 'experience',
+			sorter: (a, b) => {
+				const numA = parseInt(a.experience) || 0;
+				const numB = parseInt(b.experience) || 0;
+				return numA - numB;
+			},
+		},
+	];
+
 	return (
-		<div className='space-y-4'>
-			<div className='flex justify-between items-center'>
-				<div className='relative'>
-					<Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4' />
-					<input
-						type='text'
-						placeholder='Поиск'
-						value={globalFilter}
-						onChange={(e) => setGlobalFilter(e.target.value)}
-						className='pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-80 focus:outline-none focus:ring-2 focus:primary'
-					/>
+		<div style={{ padding: 24, background: '#f9fafb', minHeight: '100vh' }}>
+			<Card>
+				<div
+					style={{
+						marginBottom: 16,
+						display: 'flex',
+						flexDirection: 'column',
+						gap: 16,
+					}}
+				>
+					<h1 style={{ fontSize: 24, fontWeight: 'bold', margin: 0 }}>Сотрудники</h1>
+					<p style={{ color: '#6b7280', margin: 0, marginBottom: 5 }}>
+						Управление списком сотрудников компании
+					</p>
+					<Space>
+						<Input
+							placeholder='Поиск'
+							prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							style={{ width: 250, marginBottom: 8 }}
+							allowClear
+						/>
+						<span style={{ color: '#6b7280' }}>
+							Всего: {filteredEmployees.length} сотрудников
+						</span>
+					</Space>
 				</div>
-				<div className='text-sm text-gray-500'>Всего: {data.length} сотрудников</div>
-			</div>
 
-			<div className='border rounded-lg overflow-hidden shadow-sm'>
-				<table className='w-full'>
-					<thead className='bg-primary'>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<tr key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<th
-										key={header.id}
-										onClick={header.column.getToggleSortingHandler()}
-										className='px-4 py-3 text-left text-sm font-semibold text-white cursor-pointer hover:bg-primary transition-colors'
-										style={{ width: header.getSize() }}
-									>
-										<div className='flex items-center gap-1'>
-											{flexRender(
-												header.column.columnDef.header,
-												header.getContext()
-											)}
-											{header.column.getIsSorted() === 'asc' && (
-												<ChevronUp className='w-4 h-4' />
-											)}
-											{header.column.getIsSorted() === 'desc' && (
-												<ChevronDown className='w-4 h-4' />
-											)}
-										</div>
-									</th>
-								))}
-							</tr>
-						))}
-					</thead>
-					<tbody>
-						{table.getRowModel().rows.map((row, idx) => (
-							<tr
-								key={row.id}
-								onClick={() => handleRowClick(row.original.id)}
-								className={`border-b hover:bg-blue-50 transition-colors cursor-pointer ${
-									idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-								}`}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<td key={cell.id} className='px-4 py-3 text-sm text-gray-700'>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</td>
-								))}
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
-
-			<div className='flex justify-between items-center pt-2'>
-				<div className='flex items-center gap-2'>
-					<span className='text-sm text-gray-600'>Строк на странице:</span>
-					<select
-						value={table.getState().pagination.pageSize}
-						onChange={(e) => table.setPageSize(Number(e.target.value))}
-						className='border border-gray-300 rounded-md px-2 py-1 text-sm'
-					>
-						{[1, 2, 3, 4, 5].map((size) => (
-							<option key={size} value={size}>
-								{size}
-							</option>
-						))}
-					</select>
-				</div>
-				<div className='flex gap-2'>
-					<button
-						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
-						className='px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-50'
-					>
-						Назад
-					</button>
-					<span className='px-3 py-1 text-sm'>
-						{table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
-					</span>
-					<button
-						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
-						className='px-3 py-1 border rounded-md text-sm disabled:opacity-50 hover:bg-gray-50'
-					>
-						Вперед
-					</button>
-				</div>
-			</div>
+				<Table
+					columns={columns.map((col) => ({
+						...col,
+						onHeaderCell: () => ({
+							style: { background: '#4F8BFF', color: 'white' },
+						}),
+					}))}
+					dataSource={filteredEmployees}
+					rowKey='id'
+					pagination={{
+						pageSize: 5,
+						showTotal: (total) => `Всего ${total} сотрудников`,
+					}}
+					onRow={(record) => ({
+						onClick: () => handleRowClick(record.id),
+						style: { cursor: 'pointer' },
+					})}
+				/>
+			</Card>
 		</div>
 	);
-};
-
-const EmployeesPage: React.FC = () => {
-	return (
-		<div className='p-6'>
-			<div className='mb-6'>
-				<h1 className='text-2xl font-bold text-gray-800'>Сотрудники</h1>
-				<p className='text-gray-500 mt-1'>Управление списком сотрудников компании</p>
-			</div>
-			<EmployeesTable />
-		</div>
-	);
-};
-
-export default EmployeesPage;
+}
