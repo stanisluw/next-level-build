@@ -1,5 +1,7 @@
-import { ChevronDown, ChevronUp, PieChart } from 'lucide-react';
-import React, { useState } from 'react';
+import { PieChartOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Progress, Row, Select, Space, Table, Tag } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 interface Employee {
@@ -32,7 +34,6 @@ export default function ResourcePage() {
 	const [selectedEmployee, setSelectedEmployee] = useState<string>('Все');
 	const [periodMode, setPeriodMode] = useState<'plan' | 'actual'>('actual');
 	const [displayMode, setDisplayMode] = useState<'fte' | 'percent' | 'hours'>('fte');
-	const [expandedId, setExpandedId] = useState<number | null>(null);
 
 	const totalFte = employeesData.reduce(
 		(sum, emp) => sum + (periodMode === 'actual' ? emp.actual : emp.plan),
@@ -45,257 +46,322 @@ export default function ResourcePage() {
 		return `${Math.round(value * 160)}ч`;
 	};
 
+	const columns: ColumnsType<Employee> = [
+		{
+			title: '№',
+			key: 'index',
+			width: 60,
+			render: (_, __, index) => index + 1,
+		},
+		{
+			title: 'ФИО',
+			dataIndex: 'name',
+			key: 'name',
+			width: 250,
+		},
+		{
+			title: 'Статус',
+			dataIndex: 'status',
+			key: 'status',
+			width: 100,
+			render: (status: string) => (
+				<Tag color={status === 'Активен' ? 'green' : 'orange'}>{status}</Tag>
+			),
+		},
+		{
+			title: 'План',
+			dataIndex: 'plan',
+			key: 'plan',
+			width: 100,
+			render: (value: number) => formatValue(value),
+		},
+		{
+			title: 'Факт',
+			dataIndex: 'actual',
+			key: 'actual',
+			width: 100,
+			render: (value: number) => (
+				<span style={{ color: '#4F8BFF', fontWeight: 'bold' }}>{formatValue(value)}</span>
+			),
+		},
+		{
+			title: 'Часы',
+			key: 'hours',
+			width: 80,
+			render: (_, record) => `${Math.round(record.actual * 160)}ч`,
+		},
+		{
+			title: 'Детали',
+			key: 'details',
+			width: 80,
+			render: () => <span className='text-gray-400'>подробнее</span>,
+		},
+	];
+
+	const expandedRowRender = (record: Employee) => {
+		return (
+			<div style={{ padding: '16px' }}>
+				<h4 style={{ marginBottom: 30 }}>Распределение по неделям</h4>
+				<div style={{ display: 'flex', gap: 16, height: 120, alignItems: 'flex-end' }}>
+					{weeksData.map((week, i) => (
+						<div
+							key={i}
+							style={{
+								flex: 1,
+								display: 'flex',
+								flexDirection: 'column',
+								alignItems: 'center',
+								gap: 4,
+							}}
+						>
+							<div style={{ fontSize: 12, color: '#666' }}>{week.week}</div>
+							<div
+								style={{
+									width: '100%',
+									backgroundColor: '#4F8BFF',
+									borderRadius: '4px 4px 0 0',
+									height: `${week.actual * 100}px`,
+									minHeight: '4px',
+								}}
+							/>
+							<div style={{ fontSize: 14, fontWeight: 'bold', color: '#4F8BFF' }}>
+								{week.actual} FTE
+							</div>
+							<div style={{ fontSize: 11, color: '#999' }}>{week.date}</div>
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	};
+
 	return (
-		<div className='p-6 bg-gray-50 min-h-screen'>
-			<div className='mb-4 text-sm text-gray-500'>
-				<span
-					className='hover:text-primary cursor-pointer'
-					onClick={() => navigate('/projects')}
-				>
-					Назад
-				</span>
-			</div>
+		<div style={{ padding: 24, background: '#f9fafb', minHeight: '100vh' }}>
+			<Button
+				type='link'
+				onClick={() => navigate('/projects')}
+				style={{ marginBottom: 16, paddingLeft: 0 }}
+			>
+				Назад
+			</Button>
 
-			<div className='mb-6'>
-				<h1 className='text-2xl font-bold text-gray-800'>Ресурсный учёт</h1>
-				<p className='text-gray-500 text-sm mt-1'>Планирование ресурсов по сотрудникам</p>
-			</div>
+			<h1 style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 8 }}>Ресурсный учёт</h1>
+			<p style={{ color: '#6b7280', marginBottom: 24 }}>
+				Планирование ресурсов по сотрудникам
+			</p>
 
-			<div className='bg-white rounded-lg shadow-sm border p-4 mb-6'>
-				<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-					<div>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Выбор сотрудника
-						</label>
-						<select
+			<Card style={{ marginBottom: 24 }}>
+				<Row gutter={16}>
+					<Col span={6}>
+						<div style={{ marginBottom: 8 }}>Выбор сотрудника</div>
+						<Select
 							value={selectedEmployee}
-							onChange={(e) => setSelectedEmployee(e.target.value)}
-							className='w-full border border-gray-300 rounded-md px-3 py-2'
-						>
-							<option>Все</option>
-							{employeesData.map((emp) => (
-								<option key={emp.id}>{emp.name}</option>
-							))}
-						</select>
-					</div>
-					<div>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Период отображения
-						</label>
-						<select
+							onChange={setSelectedEmployee}
+							style={{ width: '100%' }}
+							options={[
+								{ value: 'Все', label: 'Все' },
+								...employeesData.map((emp) => ({
+									value: emp.name,
+									label: emp.name,
+								})),
+							]}
+						/>
+					</Col>
+					<Col span={6}>
+						<div style={{ marginBottom: 8 }}>Период отображения</div>
+						<Select
 							value={periodMode}
-							onChange={(e) => setPeriodMode(e.target.value as 'plan' | 'actual')}
-							className='w-full border border-gray-300 rounded-md px-3 py-2'
-						>
-							<option value='actual'>Факт</option>
-							<option value='plan'>План</option>
-						</select>
-					</div>
-					<div>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Режим отображения
-						</label>
-						<select
+							onChange={setPeriodMode}
+							style={{ width: '100%' }}
+							options={[
+								{ value: 'actual', label: 'Факт' },
+								{ value: 'plan', label: 'План' },
+							]}
+						/>
+					</Col>
+					<Col span={6}>
+						<div style={{ marginBottom: 8 }}>Режим отображения</div>
+						<Select
 							value={displayMode}
-							onChange={(e) =>
-								setDisplayMode(e.target.value as 'fte' | 'percent' | 'hours')
-							}
-							className='w-full border border-gray-300 rounded-md px-3 py-2'
+							onChange={setDisplayMode}
+							style={{ width: '100%' }}
+							options={[
+								{ value: 'fte', label: 'FTE' },
+								{ value: 'percent', label: '%' },
+								{ value: 'hours', label: 'Часы' },
+							]}
+						/>
+					</Col>
+					<Col span={6}>
+						<Card
+							size='small'
+							style={{ background: '#eff6ff', textAlign: 'center', border: 'none' }}
 						>
-							<option value='fte'>FTE</option>
-							<option value='percent'>%</option>
-							<option value='hours'>Часы</option>
-						</select>
-					</div>
-					<div className='bg-blue-50 rounded-md p-3 text-center'>
-						<p className='text-sm text-gray-500'>Общий FTE</p>
-						<p className='text-2xl font-bold text-primary'>{totalFte.toFixed(2)} FTE</p>
-					</div>
-				</div>
-			</div>
+							<div style={{ fontSize: 12, color: '#6b7280' }}>Общий FTE</div>
+							<div style={{ fontSize: 24, fontWeight: 'bold', color: '#4F8BFF' }}>
+								{totalFte.toFixed(2)} FTE
+							</div>
+						</Card>
+					</Col>
+				</Row>
+			</Card>
 
-			<div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-				<div className='lg:col-span-2 bg-white rounded-lg shadow-sm border'>
-					<div className='overflow-x-auto'>
-						<table className='w-full'>
-							<thead className='bg-gray-50 border-b'>
-								<tr>
-									<th className='px-4 py-3 w-8'></th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										№
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										ФИО
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										Статус
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										План
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										Факт
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										Часы
-									</th>
-									<th className='px-4 py-3 text-sm font-semibold text-gray-700'>
-										Детали
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-								{employeesData.map((emp, idx) => (
-									<React.Fragment key={emp.id}>
-										<tr className='border-b hover:bg-gray-50'>
-											<td className='px-4 py-3'>
-												<button
-													onClick={() =>
-														setExpandedId(
-															expandedId === emp.id ? null : emp.id
-														)
-													}
-												>
-													{expandedId === emp.id ? (
-														<ChevronUp size={16} />
-													) : (
-														<ChevronDown size={16} />
-													)}
-												</button>
-											</td>
-											<td className='px-4 py-3'>{idx + 1}</td>
-											<td className='px-4 py-3 font-medium'>{emp.name}</td>
-											<td className='px-4 py-3'>
-												<span
-													className={`px-2 py-1 rounded-full text-xs font-medium ${emp.status === 'Активен' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}
-												>
-													{emp.status}
-												</span>
-											</td>
-											<td className='px-4 py-3 text-gray-500'>
-												{formatValue(emp.plan)}
-											</td>
-											<td className='px-4 py-3 font-semibold text-primary'>
-												{formatValue(emp.actual)}
-											</td>
-											<td className='px-4 py-3 text-gray-500'>
-												{Math.round(emp.actual * 160)}ч
-											</td>
-											<td className='px-4 py-3 text-gray-400 text-sm'>
-												подробнее
-											</td>
-										</tr>
-										{expandedId === emp.id && (
-											<tr className='bg-gray-50'>
-												<td colSpan={8} className='px-4 py-4'>
-													<div>
-														<h4 className='font-medium text-gray-800 mb-3'>
-															Распределение по неделям
-														</h4>
-														<div className='flex gap-4 h-32 items-end'>
-															{weeksData.map((week, i) => (
-																<div
-																	key={i}
-																	className='flex-1 flex flex-col items-center gap-0'
-																>
-																	<div className='text-xs text-gray-600 font-medium'>
-																		{week.week}
-																	</div>
-																	<div
-																		className='w-full bg-primary rounded-t transition-all'
-																		style={{
-																			height: `${week.actual * 100}px`,
-																			minHeight: '4px',
-																		}}
-																	/>
-																	<div className='text-sm font-semibold text-primary'>
-																		{week.actual} FTE
-																	</div>
-																	<div className='text-xs text-gray-400'>
-																		{week.date}
-																	</div>
-																</div>
-															))}
-														</div>
-													</div>
-												</td>
-											</tr>
-										)}
-									</React.Fragment>
+			<Row gutter={24}>
+				<Col span={16}>
+					<Card>
+						<Table
+							columns={columns}
+							dataSource={employeesData}
+							rowKey='id'
+							pagination={{
+								pageSize: 10,
+							}}
+							expandable={{
+								expandedRowRender,
+								rowExpandable: () => true,
+							}}
+						/>
+					</Card>
+				</Col>
+
+				<Col span={8}>
+					<Space direction='vertical' size={16} style={{ width: '100%' }}>
+						<Card
+							title={
+								<span>
+									<PieChartOutlined style={{ color: '#4F8BFF' }} /> Столбчатая
+									диаграмма
+								</span>
+							}
+						>
+							<div
+								style={{
+									display: 'flex',
+									gap: 12,
+									height: 100,
+									alignItems: 'flex-end',
+								}}
+							>
+								{weeksData.map((week, i) => (
+									<div
+										key={i}
+										style={{
+											flex: 1,
+											display: 'flex',
+											flexDirection: 'column',
+											alignItems: 'center',
+											gap: 4,
+										}}
+									>
+										<div
+											style={{
+												display: 'flex',
+												gap: 4,
+												justifyContent: 'center',
+												width: '100%',
+											}}
+										>
+											<div
+												style={{
+													width: 12,
+													backgroundColor: '#4F8BFF',
+													borderRadius: '4px 4px 0 0',
+													height: `${week.plan * 60}px`,
+													minHeight: '2px',
+												}}
+											/>
+											<div
+												style={{
+													width: 12,
+													backgroundColor: '#10b981',
+													borderRadius: '4px 4px 0 0',
+													height: `${week.actual * 60}px`,
+													minHeight: '2px',
+												}}
+											/>
+										</div>
+										<div style={{ fontSize: 11, color: '#666' }}>
+											{week.week}
+										</div>
+										<div style={{ fontSize: 10, color: '#999' }}>
+											{week.date}
+										</div>
+									</div>
 								))}
-							</tbody>
-						</table>
-					</div>
-				</div>
-
-				<div className='space-y-6'>
-					<div className='bg-white rounded-lg shadow-sm border p-4'>
-						<h3 className='text-md font-semibold text-gray-800 mb-3 flex items-center gap-2'>
-							<PieChart size={18} /> Столбчатая диаграмма
-						</h3>
-						<div className='flex gap-3 h-48 items-end'>
-							{weeksData.map((week, i) => (
-								<div key={i} className='flex-1 flex flex-col items-center gap-2'>
-									<div className='flex gap-1 w-full justify-center'>
-										<div
-											className='bg-primary rounded-t w-4'
-											style={{
-												height: `${week.plan * 80}px`,
-												minHeight: '2px',
-											}}
-										/>
-										<div
-											className='bg-green-400 rounded-t w-4'
-											style={{
-												height: `${week.actual * 80}px`,
-												minHeight: '2px',
-											}}
-										/>
-									</div>
-									<div className='text-xs text-gray-600 font-medium'>
-										{week.week}
-									</div>
-									<div className='text-xs text-gray-400'>{week.date}</div>
-								</div>
-							))}
-						</div>
-						<div className='flex justify-center gap-4 mt-3 pt-2 border-t'>
-							<div className='flex items-center gap-2'>
-								<div className='w-3 h-3 bg-primary rounded'></div>
-								<span className='text-sm text-gray-600'>План</span>
 							</div>
-							<div className='flex items-center gap-2'>
-								<div className='w-3 h-3 bg-green-400 rounded'></div>
-								<span className='text-sm text-gray-600'>Факт</span>
+							<div
+								style={{
+									display: 'flex',
+									justifyContent: 'center',
+									gap: 24,
+									marginTop: 16,
+								}}
+							>
+								<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+									<div
+										style={{
+											width: 12,
+											height: 12,
+											background: '#4F8BFF',
+											borderRadius: 2,
+										}}
+									/>
+									<span>План</span>
+								</div>
+								<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+									<div
+										style={{
+											width: 12,
+											height: 12,
+											background: '#10b981',
+											borderRadius: 2,
+										}}
+									/>
+									<span>Факт</span>
+								</div>
 							</div>
-						</div>
-					</div>
+						</Card>
 
-					<div className='bg-white rounded-lg shadow-sm border p-4'>
-						<h3 className='text-md font-semibold text-gray-800 mb-3'>
-							Распределение по сотрудникам
-						</h3>
-						<div className='space-y-3'>
-							{employeesData.map((emp) => (
-								<div key={emp.id} className='flex items-center justify-between'>
-									<span className='text-sm text-gray-700 w-32'>
-										{emp.name.split(' ')[0]} {emp.name.split(' ')[1]?.[0]}.
-									</span>
-									<div className='flex-1 mx-3 h-2 bg-gray-200 rounded-full overflow-hidden'>
+						<Card title='Распределение по сотрудникам'>
+							<Space direction='vertical' style={{ width: '100%' }} size={3}>
+								{employeesData.map((emp) => (
+									<div key={emp.id}>
 										<div
-											className='h-full bg-primary rounded-full'
-											style={{ width: `${(emp.actual / totalFte) * 100}%` }}
+											style={{
+												display: 'flex',
+												justifyContent: 'space-between',
+												marginBottom: 4,
+											}}
+										>
+											<span style={{ fontSize: 13, color: '#666' }}>
+												{emp.name.split(' ')[0]}{' '}
+												{emp.name.split(' ')[1]?.[0]}.
+											</span>
+											<span
+												style={{
+													fontSize: 13,
+													fontWeight: 'bold',
+													color: '#4F8BFF',
+												}}
+											>
+												{emp.actual} FTE
+											</span>
+										</div>
+										<Progress
+											percent={Number(
+												((emp.actual / totalFte) * 100).toFixed(0)
+											)}
+											showInfo={false}
+											strokeColor='#4F8BFF'
+											size='small'
 										/>
 									</div>
-									<span className='text-sm font-semibold text-primary w-16 text-right'>
-										{emp.actual} FTE
-									</span>
-								</div>
-							))}
-						</div>
-					</div>
-				</div>
-			</div>
+								))}
+							</Space>
+						</Card>
+					</Space>
+				</Col>
+			</Row>
 		</div>
 	);
 }
