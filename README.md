@@ -128,3 +128,8 @@
 | **Vite** | Настроил быструю сборку, HMR и алиасы (`#app`, `#pages`, `#shared`) |
 | **Biome** | Настроил линтинг и форматирование для TypeScript и JSX |
 | **Git** | Вёл историю коммитов, создавал ветки (`feature/auth`, `feature/resource`) |
+
+```.env
+VITE_APP_INFO_URL={origin}/info.json
+VITE_LOCALE_URL={origin}/locales/ru/translation.json
+```
